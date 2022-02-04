@@ -35,16 +35,22 @@ d) Make sure your R code runs before you add it in your .Rmd file.
 For each of parts (a) through (d), indicate whether we would generally expect the performance of a flexible statistical learning method to be better or worse than an inflexible method. Justify your answer.
 
 a) The sample size $n$ is extremely large, and the number of predictors $p$ is small.
+
 b) The number of predictors $p$ is extremely large, and the number of observations $n$ is small.
+
 c) The relationship between the predictors and response is highly non-linear.
+
 d) The variance of the error terms, $Var(\epsilon)$, is extremely high.
 
 # Answer 1
 
-a) Lorem ipsum dolor sit amet
-b) consectetur adipiscing elit
-c) sed do eiusmod tempor incididunt ut labore
-d)  et dolore magna aliqua.
+a) When the sample size is large and the number of independent variables are small, I expect a flexible statistical learning method to be better  because $\hat{f}(x_{0})$ would fit the data better due to a larger sample size.
+
+b) When $p>n$, a flexible learning method is worse because of overfitting the data. This will result in a high test $MSE$.
+
+c) The flexible learning method would be better if the relationship between the predictors and the response is highly non-linear. Flexible learning methods eliminate bias in the estimates for non-linear relationships whereas inflexible methods will have extremely high bias and high variance. 
+
+d) A high variance in the irreducible error term will make a flexible learning method worse because flexible learning methods will try and predict the random noise element causing high variance in $\hat{f}(x_{0})$.
 
 
 # Question 2 (concept)[10p]
@@ -66,9 +72,9 @@ data for all of 2012. For each week we record the % change in the USD/Euro, the
 in the German market.
 
 # Answer 2
-a) Ut enim ad minim veniam
-b) quis nostrud exercitation ullamco laboris nisi
-c) ut aliquip ex ea commodo consequat.
+a) This is a regression problem because we are trying to inference changes in CEO salary, hence the response variable is quantitative. $N=500,  P = 3$
+b) This is a classification problem because the response variable is qualitative. $N=20, P=13$. Here we are interested  in prediction. 
+c) Regression problem and we are interested in prediction. $N= 52, P = 3$.
 
 
 # Question 3 (concept)[20p]
@@ -86,15 +92,12 @@ b) Explain why each of the five curves has the shape displayed in part (a)
 # Answer 3
 a) Here, either you're going to sketch the graph, take a picture and attach it (make sure you are using the right file format, for example it could be .jpg or .png), this way:
 
-![Bailey](C:/Users/dcste/OneDrive/Senior_Year_Second_Semester/Econ_490/Homework/Econ_490_HW/Calculus II (2).jpg){width=.2in}
+![Question 3 Graph](C:/Users/dcste/OneDrive/Senior_Year_Second_Semester/Econ_490/Homework/Econ_490_HW/Question_3.jpg){width=.2in}
  
- or make your graph directly in R:  
-```{r}
-plot(x1 <- seq(0, 20, 0.01), y1 <-cos(x1), type="l",  main="main title", xlab="x-axis label", ylab="y-axis label", col = "blue", lwd = 2)
-```
 
 
-b) Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+b) *Typical squared bias* always decreases as flexibility increases because flexible learning methods can accurately estimate a real-life problem better than inflexible methods, especially when the true relationship is non-linear. *Training MSE** always declines as flexiblity grows  because bias continually declines which produces a better $\hat{f}(x_{1})$ to fit the training data. *Variance* always increases as flexibility grwos. For example, if the training or test data have a high variance, htne small changes in the data result in large changes in $\hat{f}$. *Test MSE* is U-shaped due to the relative rate of change in bias and variance. As flexibility increases, bias tends to fall faster than variance causing a decline in test MSE, however, beyone a certain point increasing flexibility does little to change the bias so the variance increases significantly, causing test MSE to increase. 
 
 # Question 4 (concept)[20p]
 The table below provides a training data set containing six observations, three predictors, and one qualitative response variable 
@@ -133,22 +136,35 @@ a) Here it would be recommended to create a table (or choose any way want to pro
 +------+-------+-------+-------+----------------------------+
 | Obs. | $X_1$ | $X_2$ | $X_3$ | $d\big(obs, (0,0,0) \big)$ |
 +======+=======+=======+=======+============================+
-|  1)  |   0   |   3   |   0   |              ?             |
+|  1)  |   0   |   3   |   0   |              3           |
 +------+-------+-------+-------+----------------------------+
-|  2)  |   2   |   0   |   0   |              ?             |
+|  2)  |   2   |   0   |   0   |              2             |
 +------+-------+-------+-------+----------------------------+
-|  3)  |   0   |   1   |   3   |              ?             |
+|  3)  |   0   |   1   |   3   |              3.162             |
 +------+-------+-------+-------+----------------------------+
-|  4)  |   0   |   1   |   2   |              ?             |
+|  4)  |   0   |   1   |   2   |              2.236             |
 +------+-------+-------+-------+----------------------------+
-|  5)  |  -1   |   0   |   1   |              ?             |
+|  5)  |  -1   |   0   |   1   |              1.414          |
 +------+-------+-------+-------+----------------------------+
-|  6)  |   1   |   1   |   1   |              ?             |
+|  6)  |   1   |   1   |   1   |              1.732         |
 +------+-------+-------+-------+----------------------------+
 
-b) Red or Green?
-c) Red or Green?
-d) Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+b) 
+
+$\Pr(Y=green|X=x_{0})$ = $\frac{1}{1}\sum_{i= N_{0}}^{i} I(Y_{i}=Green)$ equals 1.
+
+$\Pr(Y=Red|X=x_{0})$ = $\frac{1}{1}\sum_{i= N_{0}}^{i} I(Y_{i}=Red)$ equals 0.
+
+The shortest distance from the vector $ [0,0,0]$ is observation 5, which was green. 
+
+
+c) $\Pr(Y=green|X=x_{0})$ = $\frac{1}{3}\sum_{i= N_{0}}^{i} I(Y_{i}=Green)$ equals $\frac{1}{3}$.
+
+$\Pr(Y=Red|X=x_{0})$ = $\frac{1}{3}\sum_{i= N_{0}}^{i} I(Y_{i}=Red)$ equals $\frac{2}{3}$
+
+Since $\frac{2}{3} > \frac{1}{3}$ our prediction with $K = 3$ is *red.*
+
+d) If the Bayes decision boundary is highly non-linear, then we would expect the best value of K to be small since smaller values of K represent more flexible approaches for a classifcation setting. 
 
 
 # Question 5 (applied)[30p for part (c)]
@@ -173,20 +189,29 @@ This exercise relates to the College data set, It contains a number of variables
 - Expend: Instructional expenditure per student
 - Grad.Rate: Graduation rate
 
+
+
 Before reading the data into R, it can be viewed in Excel or a text editor.
 
 a) Use the read.csv() function to read the data into R. Call the loaded data college. Make sure that you have the directory set to the correct location for the data. The R commands getwd() and setwd() may be helpful.
+```{r}
+college <- read.csv("C:/Users/dcste/OneDrive/Senior_Year_Second_Semester/Econ_490/Homework/Econ_490_HW/College.csv",stringsAsFactors = T)
+str(college)
+```
+
+
 
 b) Look at the data using the View() function. You should notice that the first column is just the name of each university. We don't really want R to treat this as data. However, it may be handy to have these names for later. Try the following commands:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
+
 rownames(college) <- college[, 1]
 View(college)
 ```
 
 You should see that there is now a row.names column with the name of each university recorded. This means that R has given each row a name corresponding to the appropriate university. R will not try to perform calculations on the row names. However, we still need to eliminate the first column in the data where the names are stored. Try
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 college <- college[, -1]
 View(college)
 ```
@@ -196,25 +221,55 @@ Now you should see that the first data column is Private. Note that another colu
 c) 
 i. Use the summary() function to produce a numerical summary of the variables in
 the data set.
+
+```{r}
+summary(college)
+
+```
+
+
+
+
 ii. Use the pairs() function to produce a scatterplot matrix of the first ten columns
 or variables of the data. Recall that you can reference the first ten columns of a
 matrix A using A[,1:10].
+
+```{r}
+pairs(college[,1:10])
+```
+
+
 iii. Use the plot() function to produce side-by-side boxplots of Outstate versus
 Private.
+
+```{r}
+plot(college$Private,college$Outstate, main = "Out of State Tutition", xlab = "Private",ylab = "Tution", col = "cornflowerblue")
+```
+
+
+
 iv. Create a new qualitative variable, called Elite, by binning the Top10perc
 variable. We are going to divide universities into two groups based on whether or
 not the proportion of students coming from the top 10% of their high school classes
 exceeds 50%.
 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 Elite <- rep("No", nrow(college))
 Elite[college$Top10perc > 50] <- "Yes"
-Elite <- as.factor(Elite)
-college <- data.frame(college, Elite)
+Elite_1 <- as.factor(Elite)
+college <- data.frame(college, Elite_1)
+str(college)
+
 ```
 
 Use the summary() function to see how many elite universities there are. Now use the plot() function to produce side-by-side boxplots of Outstate versus Elite.
+
+```{r}
+
+plot(college$Elite,college$Outstate, main = "Out of State Tution", xlab = "Elite College", ylab = "Tution", col = "cornflowerblue")
+```
+
 
 v. Use the hist() function to produce some histograms with differing numbers of
 bins for a few of the quantitative variables. You may find the command par(mfrow
@@ -222,17 +277,47 @@ bins for a few of the quantitative variables. You may find the command par(mfrow
 plots can be made simultaneously. Modifying the arguments to this function will
 divide the screen in other ways.
 
-vi. Continue exploring the data, and provide a brief summary of what you discover.
-
-# Answer 5 (applied)
-
-For the applied questions all the written code needs to be provided, including the display. If you are going to display data (or large data.frames/matrices), please use the head() function in R to display just a small part of it.  
 
 
-```{r cars}
-summary(cars)
-head(cars)
+```{r}
+par(mfrow = c(3,2))
+hist(college$perc.alumni,breaks = 100, col = "green")
+hist(college$Top10perc, breaks = 50, col = "red")
+hist(college$Books, breaks = 40, col = "yellow")
+hist(college$Grad.Rate, col = "cornflowerblue")
+hist(college$Expend,breaks = 50, col = "orange")
+
 ```
 
 
+
+vi. Continue exploring the data, and provide a brief summary of what you discover.
+
+```{r}
+college_1 <- data.frame(exp = college$Expend,elite = Elite_1, num_phd = college$PhD,alumn_perc = college$perc.alumni, s_f_ratio = college$S.F.Ratio)
+expend <- lm(exp~elite+num_phd+alumn_perc+s_f_ratio,data=college_1)
+summary(expend)
+names(college_1)
+
+```
+
+```{r}
+
+library(moments)
+library(knitr)
+
+
+descriptive_statistics <- rbind(apply(college[,2:18],2,mean),
+                                apply(college[,2:18],2,sd),
+                                apply(college[,2:18],2,var),
+                                apply(college[,2:18],2,skewness),
+                                apply(college[,2:18],2,kurtosis))
+descriptive_statistics <- round(descriptive_statistics,2)
+rownames(descriptive_statistics) <- c("Mean", "Standard Deviation", "Variance", "Skewness", "Kurtosis")
+descriptive_statistics
+
+```
+
+
+After exploring the data, I wanted to discover the average treatment effect of expenditure per student and going to an elite school. What I found was surprising. Holding the variables PHD, S/F Ratio, Percent Alumni who donate fixed, I found that the average instructional expenditure per student increases by $5663 dollars. According to the descriptive statistics above, this is approximately one full standard deviation higher than students who do not attend elite schools. Reasons why are most likely related to endowment levels and tuition levels.
 
