@@ -1,0 +1,240 @@
+---
+title: "ECON_490_PS2_dcstein2"
+author: "Danny Stein"
+date: "2/16/2022"
+output: html_document
+---
+
+
+
+
+```{r, echo = FALSE}
+library(ISLR2)
+
+
+```
+## Question 1
+
+The null hypothesis $H_{0}: \beta_{j} = 0$ against the two-side alternative $H_{1}: \beta_{j} \ne 0$ tests whether the coefficients radio, newspaper, tv are statistically significant. The p-value is the probability of observing a t-statistic as extreme as we did if the null hypothesis is true. From the output, we can reject the null hypothesis for TV and Radio and conclude *there is a statistically significant relationship corresponding to sales.* For the variable Newspaper, *cannot reject the null hypothesis and conclude there is no statistically significant relationship betweens sales and newspaper.*
+
+
+## Question 2
+
+### Part A:
+
+The correct choice is part iii: For a fixed value of **IQ and GPA **, high school graduates earn on average a higher starting salary than college graduates provided $GPA \ge 3.5$.
+
+This results in finding the inequality: $ 50 + 20(GPA)  \ge 85 + 10(GPA)$. The LHS of the equation are high school graduates and the RHS is college. In order for a high school graduate to have a higher starting salary holding IQ and GPA fixed, we solve for GPA finding $GPA \ge 3.5$.
+
+
+### Part B
+
+After plugging in the x values for the respective coefficients, salary = $135.1. 
+
+
+### Part C
+
+*False:*To verify if the interactive term is signfificant by a t-test. If the p-value is high, then that provides evidence of statistical insignificance. 
+
+
+
+## Question 3
+
+### Part a
+```{r}
+set.seed(1)
+x <- rnorm(100)
+
+```
+### Part b
+
+```{r}
+
+eps <- rnorm(100,mean = 0, sd = sqrt(.25))
+
+
+```
+### Part C
+
+```{r}
+y <- -1 +.5*x +eps
+length(y)
+```
+$\beta_{0} = -1$ an $\beta_{1} = .5$
+
+### Part D
+
+```{r}
+plot(x,y, main = "Scatter Plot", col = "green", xlab = "X", ylab = "Y")
+
+```
+
+
+In this plot we can clearly see there is a linear relationship between x and y. 
+
+### Part E
+
+```{r}
+
+model <- lm(y~x)
+
+summary(model)
+```
+*Comment:* This is a simple linear regression model. The estimates are the same as in **part c.**Both estimate are statistically significant, however the estimates in the regression differ than from Part C. The intercept is smaller, however, the $\beta_{1}$ coefficient is slightly bigger. 
+
+
+### Part F
+
+```{r}
+plot(x,y, main = "Scatter Plot", col = "green", xlab = "X", ylab = "Y")
+abline(model, col = "blue")
+legend("topleft", c("Simple Regression Line"), lwd = 2, col = "blue")
+
+```
+
+
+### Part G
+
+```{r}
+model_2 <- lm(y~poly(x,2))
+summary(model_2)
+
+```
+
+
+The second degree polynomial equation does in fact give us a better model fit since the R-squared increased slightly.However, the $\beta_{2}$ coefficient is statistically insignificant and the F-statistic dropped by about half. This suggests the second degree polynomial equation is **not a good fit.**
+
+
+### Part H
+
+No matter what, whenever you add another aggressor to a line, the sum of squared residuals always declines because more variables can explain the associated response. 
+
+
+### Part I
+
+Using test data for the polynomial regression, I would expect a higher residual sum of squares because the equation is more flexible than a simple linear regression. This would occur because the model would overfit the training data too much causing a larger error term in the test data. 
+
+
+## Question 3
+
+### Part A
+```{r}
+car <- Carseats
+View(car)
+names(car)
+
+```
+### Part B
+
+```{r}
+model_3 <- lm(Sales~US +ShelveLoc+ Price+CompPrice+Price*CompPrice, data = car)
+summary(model_3)
+```
+
+### Part C
+
+$\hat{Sales}$ = 5.947 + 1.0701$(USYes)$ + 4.79$(ShelveLocGood)$ + 1.83$(ShelveLocMedium)$ -.108$(Price)$+.0756$(CompPrice)$+.000129$(Price*CompPrice)$
+
+
+```{r}
+contrasts(car$ShelveLoc)
+```
+
+Using the contrasts() function, we see that the model has two dummy variables. If shelf location is good, then the dummy variable equals 1 and 0, otherwise. The same logic is applied to a medium shelf location. THe base variable, which is a bad shelf location always receives a 0. 
+
+
+### Part D
+
+The intercept has no useful intercept. It just means when all the variables are zero, sales will equal 5.94. 
+The qualitative variable 1.07$USYes$ can be interpreted as that average treatment effect of increased sales in the United States. Particulary, if the store is located in the US, then average increase in sales is 1.07 holding other factors fixed. 
+
+4.79$Shelvegood$ is a dummy variable that says if an item is located at a good location, sales on average will increase by $4.79.
+
+1.83$Shelvemedium$ is a dummy variable that says if an item is located at a good location, sales on average will increase by $1.83.
+
+-.108$Price$ describes the relationship between price and sales. A one unit increase in price results in a decline of sales by -$0.108. 
+
+0.075$CompPrice$ can be interpreted as one unit increase in the competitor price results in a $.075 increase in sales. 
+
+0.000129$Price * CompPrice$ is the interaction term. It means a one-unit increase in price and in the competitor price increases sales by $0.000129.
+
+
+
+### Part E
+
+The variable that fails to reject the null hypothesis is the interaction term since the two-side p-value is .4161. 
+
+
+
+
+
+### Part F
+
+
+```{r}
+model_4 <- model_3 <- lm(Sales~US +ShelveLoc+ Price+CompPrice, data = car)
+summary(model_4)
+```
+### Part G
+
+
+
+Both models fit the data similarly. Both have an RSE of 1.47 and an R-squared around .7308. The RSE measures the average amount of deviation about the regression line. The R-squared of .73 means that 73% of the sample variation can be explained by the variables. 
+
+
+### Part H
+
+
+```{r}
+confint(model_3)
+
+confint(model_4)
+
+
+```
+
+
+
+## Question 5
+
+### Part A
+
+
+For a student that studied 40 hours, attained an undergraduate degree of 3.5 we can calculate the probability using the logistic function: 
+
+$p(X) = \frac{e^{-6 + 0.5* 40 +3.5}}{1 + e^{-6 + 0.5 *40 +3.5}}$ = 0.37775 chance of attaining an A in the class. 
+
+### Part B
+
+In order to answer the question we need to manipulate $p(x)$.
+
+$\frac{p(X)}{1 - p(X)} = e^{\beta_0 + \beta_1 X}$
+
+Thus: $e^{-6 + 0.05X_1 + 3.5} = 1$.
+
+Taking the natural log of both sides of the equation we find that in order for this person to have a chance of getting an A in the course, 
+
+$.05X_{1} = 2.5$. Thus the person needs to study at least **50 Hours.**
+
+
+## Question 6
+
+
+### Part A
+
+This amounts to finding the probability: $\frac{p(X)}{1 - p(X)}$. On average if, a person with an odds of .37 of defaulting and does default is equal to this expression:
+
+$\frac{.37}{1+.37} = P(x) =0.27007$. THe fraction of people with a .37 odds defaults 27% of the time. 
+
+### Part B
+
+In this question $P(x) = .16$.
+So the odds that someone default on their credit card is equal to this expression:
+
+$\frac{.16}{1-.16} = 0.1905$. The odds of this person defaulting  with a probability .16 is approximately 1 in 5 on average.  
+
+
+
+
+
+
