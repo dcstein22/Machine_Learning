@@ -1,0 +1,477 @@
+---
+title: "Econ_490_PS3_dcstein2"
+author: "Danny Stein"
+date: "4/4/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1
+
+## Part a
+
+**Answer:**The model that has the smallest training RSS is best subset selection because it's a model with k predictors. This is due to the fact that RSS of best subset selection will always decrease as the number of k predictors approaches p. Using training data, we will always end up with the full model, hence the lowest training RSS. 
+
+## Part b
+
+**Answer:**There is no straigtforward answer for which model produces the lowest test MSE.
+
+## Part c
+*I*
+
+**Answer:**True- THe model with (k+1) predictors are obtained by adding one additional variable at a time that leads to the greatest improvement in the model.  
+
+
+*II*
+
+**Answer:**True-The model with k predictors is rendered through the removal of one predictor at a time from the (k+1) variable model.
+
+
+*III*
+
+**Answer:**False- Adding or elminating a variable in a model may consequently remove any other variables that do not improve the model fit.
+
+
+*IV*
+
+**Answer:**False-There is no direct relationship between variables selected in either forward or backward stepwise selection.
+
+
+*V*
+
+**Answer:**False-The model that contains (K+1) predictors is obtained by selecting all possible models with (k+1) predictors, which does not mean the model will contain the k-variable model. 
+
+
+
+
+#Question 2
+
+## Part a
+
+**Answer:**The lasso, relative to OLS has a lower variance than OLS and will give improved prediction accuracy when its increase in bias is less than its decrease in variance. 
+
+
+##Part b
+
+**Answer:**The ridge regression compared to OLS is the same as the Lasso. There will be improved prediction accuracy when its increase in bias is less than than the decrease in variance of f(x). 
+
+
+## Part c
+
+**Answer:**Non-linear models compared to OLS are more flexible and will have improved prediction accuracy when the increase in variance of f(x) is less than the decrease in bias. 
+
+# Question 3
+
+## Part a
+
+
+**Answer:**The training MSE will steadily increase as the tuning parameter increases since the flexibility of the model is drastically reduced. 
+
+
+## Part b
+
+**Answer:** The test RSS will decrease initially as flexibility decreases, however, then test RSS increases because the bias increases larger than the decrease in variance of f(x).
+
+
+## Part c
+
+**Answer:** Variance will decrease steadily as the tuning parameter approaches $\infty$ since the ridge regression coefficients approach zero. 
+
+
+## Part d
+
+**Answer:** For squared bias, as the tuning parameter increases, the bias will steadily increase because the shrinkage parameter casues the coefficients to become significantly underestimated. 
+
+
+## Part e
+
+**Answer:** The irreducible error is independent of the model and thus is always constant. 
+
+
+# Question 4
+## part a
+
+```{r}
+college <- read.csv("C:/Users/dcste/OneDrive/Senior_Year_Second_Semester/Econ_490/Homework/Econ_490_HW/College.csv", header = T)
+set.seed(30)
+rownames(college) <- college[,1]
+college <- college[,-1]
+train <- sample(nrow(college), ceiling((nrow(college))/2))
+training_data <- college[train,]
+testing_data <- college[-train,]
+
+```
+
+
+## Part b
+
+```{r}
+
+lm_fit <- lm(Apps~.,data = training_data)
+summary(lm_fit)
+# Calculating Test Error 
+attach(college)
+test_error <- mean((Apps - predict(lm_fit,testing_data))^2)
+cat("The test error is",round(test_error))
+```
+## Part c
+
+Fit a ridge regression on the training data with the tuning parameter chosen by cross-validation. 
+
+```{r}
+library(glmnet)
+set.seed(30)
+x <- model.matrix(Apps~.,college)[,-1]
+y <- Apps
+
+```
+
+
+```{r,}
+set.seed(30)
+train_1 <- sample(1:nrow(x), nrow(x) /2)
+test <- (-train_1)
+y.test <- y[test]
+
+grid <- 10^(seq(-2,10, length.out = 100))
+ridge <- glmnet(x[train_1,],y[train_1],alpha = 0, lambda = grid, thresh = 1e-12)
+cv_lam <- cv.glmnet(x[train_1,], y[train_1], alpha = 0)
+# Selecting the best lambda
+
+best_lambda <- cv_lam$lambda.min
+cat("The lambda corresponding to the smallest test error is", round(best_lambda))
+```
+
+```{r,}
+# Calculating test mse with lambda = 409
+
+ridge_pred <- predict(ridge, s = best_lambda, newx = x[test, ])
+ridge$lambda[62]
+coef(ridge)[,62]
+test_mse <- mean((ridge_pred-y.test)^2)
+
+
+cat("The test MSE associated with this lamda is",round(test_mse))
+```
+## Part D
+
+
+```{r,}
+
+set.seed(30)
+lasso_mod <- glmnet(x[train_1,], y[train_1], alpha = 1, lambda = grid)
+lam_cv <- cv.glmnet(x[train_1,], y[train_1], alpha = 1)
+lam_best <- lam_cv$lambda.min
+lasso_pred <- predict(lasso_mod,s = lam_best, newx = x[test,])
+
+lasso_mse <- mean((lasso_pred-y.test)^2)
+predict(lasso_mod, s = lam_best, type = "coefficients")[1:18,]
+
+cat("The test mse associated with the Lasso regression is",round(lasso_mse),",and there are 17 non-zero coefficients.")
+```
+
+# Question 5
+
+## Part a
+
+```{r,}
+set.seed(1)
+
+X <- rnorm(100)
+noise <- rnorm(100)
+```
+
+
+##Part b
+
+```{r,}
+# Generating vector Y
+set.seed(1)
+Y <- 1 + 1*X +2*(X^2) - 6*(X^3) + noise
+
+
+```
+
+## Part C
+
+
+```{r,}
+library(leaps)
+set.seed(1)
+
+data1 <- data.frame(Y,X)
+model <- regsubsets(Y~poly(X,10), data = data1, nvmax = 10)
+reg_summary <- summary(model)
+
+
+
+```
+
+
+
+
+
+```{r,}
+par(mfrow = c(2,2))
+plot(reg_summary$adjr2, xlab = "number of variables", type = "l", ylab = "R-squared", col = "red")
+points(5, reg_summary$adjr2[5],col = "red", cex = 2, pch = 20)
+plot(reg_summary$cp, xlab = "number of variables", type = "l", ylab = "Cp", col = "blue")
+points(4,reg_summary$cp[4],col = "blue", cex = 2, pch = 20)
+plot(reg_summary$bic, xlab = "number of variables", type = "l", ylab = "BIC", col = "orange")
+points(3,reg_summary$bic[3], col = "orange", cex = 2, pch = 20)
+plot(reg_summary$rss, xlab = "number of variables", type = "l", ylab = "RSS", col = "gold")
+points(10, reg_summary$rss[10], col = "gold", cex = 2, pch = 20)
+
+```
+```{r,}
+
+plot(model, scale = "bic")
+plot(model, scale = "adjr2")
+plot(model, scale = "Cp")
+```
+
+```{r}
+#Select model with lowest bic indicates a third-degree polynomial equation. 
+coef(model,3)
+
+
+
+```
+
+
+## Part d
+
+
+```{r,}
+
+#model with forward selection
+set.seed(1)
+data_set <- X
+for (i in 2:10){
+  data_set <- cbind(data_set, X^i)
+}
+data_set <- data.frame(cbind(Y,data_set))
+model_fwd <- regsubsets(Y~.,data = data_set, nvmax = 10, method = "forward")
+fwd_summary <- summary(model_fwd)
+
+par(mfrow = c(2,2))
+plot(fwd_summary$bic,col = "green", xlab = "Number of variables", type = "l",ylab = "BIC")
+points(which.min(fwd_summary$bic), fwd_summary$bic[which.min(fwd_summary$bic)], cex = 2, pch =20)
+
+
+plot(fwd_summary$adjr2,col = "red", xlab = "Number of variables", type = "l", ylab = "Adjusted R-squared")
+points(which.max(fwd_summary$adjr2), fwd_summary$adjr2[which.max(fwd_summary$adjr2)], cex = 2, pch =20)
+
+
+plot(fwd_summary$cp,col = "blue", xlab = "Number of variables", type = "l", ylab = "Cp")
+points(which.max(fwd_summary$cp), fwd_summary$cp[which.max(fwd_summary$cp)], cex = 2, pch =20)
+
+coef(model_fwd, 3)
+
+```
+
+
+
+
+
+```{r,}
+
+
+model_bwd <- regsubsets(Y~.,data = data_set, nvmax = 10, method = "backward")
+bwd_summary <- summary(model_bwd)
+
+par(mfrow = c(2,2))
+plot(bwd_summary$bic,col = "green", xlab = "Number of variables", type = "l",ylab = "BIC")
+points(which.min(bwd_summary$bic), bwd_summary$bic[which.min(bwd_summary$bic)], cex = 2, pch =20)
+
+
+plot(bwd_summary$adjr2,col = "red", xlab = "Number of variables", type = "l", ylab = "Adjusted R-squared")
+points(which.max(bwd_summary$adjr2), bwd_summary$adjr2[which.max(bwd_summary$adjr2)], cex = 2, pch =20)
+
+
+plot(bwd_summary$cp,col = "blue", xlab = "Number of variables", type = "l", ylab = "Cp")
+points(which.max(bwd_summary$cp), bwd_summary$cp[which.max(bwd_summary$cp)], cex = 2, pch =20)
+
+#For backward selection, the lowest BIC is with 5 variables
+
+coef(model_bwd, 5)
+
+
+
+
+```
+
+
+**Answer:* Compared to my results in part c, the backward selection rendered 5 variables whereas both foward and best subset selection rendered 3 variables based on the lowest BIC. 
+
+
+
+
+
+
+## Part E
+
+```{r,}
+#Generating a Lasso Model with 10 independent variables
+
+set.seed(1)
+
+grid_data <- 10^(seq(-2,10, length = 100))
+train_data <- sample(1:nrow(data_set), nrow(data_set) /2)
+test_data <- -train_data
+y_test_data <- Y[test_data]
+
+X_vector <- model.matrix(Y~., data = data_set)[,-1]
+
+
+CV_out <- cv.glmnet(X_vector[train_data,],data_set$Y[train_data], alpha = 1)
+plot(CV_out)
+lass_model <- glmnet(X_vector,data_set$Y, alpha = 1, lambda = grid_data)
+
+
+```
+
+
+```{r,}
+lambda_min <- CV_out$lambda.min
+lambda_min
+predict(lass_model, s = lambda_min, type = "coefficients")
+
+
+```
+
+
+
+**Answer:** The resulting coefficient estimates that minimize the cross validation error are
+
+$Y = 1.216 + 0.1638X + 1.6416X^2-5.4812X^3+0.0307X^4-.05586X^5+0.000583X^6$
+
+The Lasso regression estimates are not similar to my step wise regression estimates, however we can see that a few coefficients are are zero. 
+
+
+
+
+
+## Part F
+
+Generating response vector $ Y = \beta_{0} + \beta_{7}X^7$
+
+```{r,}
+set.seed(20)
+Y_2 <- 1.5 + 3*(X)^7
+
+colnames(X_vector) <- paste("X",1:ncol(X_vector),sep = "")
+Y_df <- data.frame(cbind(Y_2,X_vector))
+
+
+
+```
+
+
+
+```{r,}
+
+reg_sub <- regsubsets(Y_2~.,data = Y_df, nvmax = 10)
+reg_summary <- summary(reg_sub)
+
+par(mfrow = c(2,2))
+plot(reg_summary$bic,col = "green", xlab = "Number of variables", type = "l",ylab = "BIC")
+points(which.min(reg_summary$bic), reg_summary$bic[which.min(reg_summary$bic)], cex = 2, pch =20)
+
+
+plot(reg_summary$adjr2,col = "red", xlab = "Number of variables", type = "l", ylab = "Adjusted R-squared")
+points(which.max(reg_summary$adjr2), reg_summary$adjr2[which.max(reg_summary$adjr2)], cex = 2, pch =20)
+
+
+plot(reg_summary$cp,col = "blue", xlab = "Number of variables", type = "l", ylab = "Cp")
+points(which.max(reg_summary$cp), reg_summary$cp[which.max(reg_summary$cp)], cex = 2, pch =20)
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+```{r,}
+coef(reg_sub,which.min(reg_summary$bic))
+
+
+coef(reg_sub, which.max(reg_summary$cp))
+
+coef(reg_sub, which.max(reg_summary$adjr2))
+```
+
+
+
+
+
+```{r,}
+#Lasso Approach
+
+set.seed(20)
+
+grid_3 <- 10^(seq(-2,10, length = 100))
+training_3 <- sample(nrow(Y_df), nrow(Y_df)/2)
+test_3 <- -training_3
+test_Y <- Y_df$Y_2[test_3]
+
+X_matrix <- model.matrix(Y_2~.,data =Y_df)[,-1]
+CV_lambda <- cv.glmnet(X_matrix,Y_df$Y_2, alpha = 1)
+min_cv_lambda <- CV_lambda$lambda.min
+
+plot(CV_lambda)
+
+
+```
+
+
+
+```{r}
+# Lasso Regression over a grid of values
+
+Lasso_grid <- glmnet(X_vector,Y_df$Y_2,alpha = 1,lambda = grid_3)
+
+predict(Lasso_grid, type = "coefficients", s = min_cv_lambda)
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+Using best subset selection, Mallow's Cp and Adjusted R-squared identified the correct variables and the estimates were identical. The Bayes information criterion suggested 4 variables and was drastically off from the true model. 
+
+The Lasso regression model correctly identified the correct model were extremely close to the true coefficient estimates. 
+
+
+
+
+
+
+
+
+
+
+
+
+
