@@ -1,0 +1,225 @@
+---
+title: "Econ_490_PS4_dcstein2"
+author: "Danny Stein"
+date: "4/18/2022"
+output: html_document
+---
+
+# Question 1 and 2
+
+**The following two answers are provided in the two pictures**
+
+
+![Question 1 & Part A of Question 2](C:/Users/dcste/OneDrive/Senior_Year_Second_Semester/Econ_490/Homework/Econ_490_HW/hw_4_pic_1.jpg)
+
+
+
+![Question 2-Part B](C:/Users/dcste/OneDrive/Senior_Year_Second_Semester/Econ_490/Homework/Econ_490_HW/hw_4_pic_2.jpg)
+
+
+# QUestion 3
+
+*Using the majority vote and average probability approach, what is the final classification under these two approaches?*
+
+```{r}
+
+red <- c(.1,.15,.2,.2,.55,.6,.6,.65,.7,.75)
+mean(red)
+sum(red>.5)
+
+
+
+```
+
+* Majority Vote
+  + $P(Red|X) = Red$ Since there are six values greater than .5
+  
+* Average Probability
+  + $P(Red|average(X)) = .45$ Under this classification approach, Green is the predicted classifier given the average probability <.5 
+  
+  
+  
+  
+  
+# Question 4
+
+
+
+1. Use recursive binary splitting to grow a large tree on the training data, stopping only when each terminal node has fewer than some minimum number of observations. 
+
+
+2. Apply cost complexity pruning to the the large tree in order to obtain a sequence of best subtrees as a function of $\alpha$.
+
+
+3. Use K-fold cross-validation to choose $\alpha$. That is, divide the training observations into K-folds. For each $k = 1,.....,k$:
+
+    a) Repeat steps 1 and 2 on all but the $k^{th}$ fold on the training data.
+  
+    b) Evaluate the mean squared prediction error on the data in the left-out $k^{th}$ fold, as a function of $\alpha$.
+
+
+**Average the results for each value of $\alpha$, and pick $\alpha$ to minimize the average error.**  
+
+4. Return the subtree from step 2 that corresponds to the chosen value of $\alpha$.
+
+
+# Question 5
+
+## Part A
+
+
+```{r}
+set.seed(10)
+library(ISLR2);library(tree)
+# Splitting data into training and test set
+train <- sample(1:nrow(Carseats), nrow(Carseats)/2)
+test <- Carseats[-train,]
+
+
+```
+
+## Part B
+
+```{r}
+# Fitting a regression tree on the training set using sales as response variable
+set.seed(10)
+tree_carseat <- tree(Sales~.,data = Carseats, subset = train)
+plot(tree_carseat)
+text(tree_carseat, pretty = 1)
+
+
+
+
+```
+
+
+
+```{r}
+#output of carseat regression tree
+summary(tree_carseat)
+
+
+```
+```{r}
+# Obtain Test MSE
+set.seed(10)
+seat_pred <- predict(tree_carseat,newdata = test)
+mean((seat_pred-test$Sales)^2)
+
+```
+
+
+
+
+*Part B Answers:*
+
+Using the regression tree I obtained 5 variables for construction with 20 terminal nodes. The best predictor according to the tree is Shelf location being the top split. Using my validation set I obtained a test MSE of 5.202 which was actually lower than my training MSE. 
+
+
+
+
+## Part C
+
+```{r}
+# Using cross validation to determine optimal level of tree complexity. 
+set.seed(10)
+cv_seat <- cv.tree(tree_carseat)
+plot(cv_seat$size, cv_seat$dev, type = "b")
+
+```
+
+
+```{r}
+# Pruning Tree with 5 terminal nodes
+prune_seat <- prune.tree(tree_carseat, best = 5)
+plot(prune_seat)
+text(prune_seat, pretty = 0)
+
+```
+
+
+
+```{r}
+#Calculating Test MSE with pruned tree
+
+prune_yhat <- predict(prune_seat, newdata = test)
+mean((prune_yhat-test$Sales)^2)
+
+```
+
+*Part C Answer:*
+ The optimal level of complexity only had 5 terminal nodes based on the smallest cross validation error. Yes, pruning improved test MSE as you can see $5.002 < 5.20$.
+ 
+ 
+ 
+ 
+## Part D
+
+```{r}
+#Performing bagging approach 
+library(randomForest)
+bag_seat <- randomForest(Sales~.,data = Carseats, subset = train, mtry = 10, importance = TRUE)
+bag_yhat <- predict(bag_seat, newdata = test)
+mean((bag_yhat - test$Sales)^2)
+
+bag_seat
+
+
+```
+
+```{r}
+#Using importance() function to determine most important variables
+importance(bag_seat)
+varImpPlot(bag_seat)
+```
+
+*Part D Answer:*
+
+The test MSE I obtained from bagging returned $2.943$ which is lower than the basic regression and pruned tree. This makes sense because bagging over 500 trees eliminates variance and bias since you are bootstrapping 500 different trees using 500 bootstrapped training sets, and then average the resulting predictions. This results in a lower variance model, thus reducing test MSE. 
+
+Using the importance function, I found that Shelf-location and price of car seat are the most important variables. 
+
+
+
+
+```{r}
+#Using random forest to analyze data; I will choose m to equal 4
+
+bag_random <- randomForest(Sales~., data = Carseats, subset = train, mtry = 4, importance = TRUE)
+bag_random
+bag_ran_yhat <- predict(bag_random, newdata = test)
+mean((bag_ran_yhat-test$Sales)^2)
+
+```
+
+
+```{r}
+# Using importance() function
+
+importance(bag_random)
+varImpPlot(bag_random)
+
+
+```
+
+*Part E Answers:*
+
+Using m = 4, meaning only four out of 10 variables can be considered at each split resulted in a test mse of 2.9901, which was higher than the bagging approach. Once again the most important variables are shelf-location and price of the car seat. 
+
+```{r}
+#Understanding the effect of M
+
+bag_random_6 <- randomForest(Sales~.,data = Carseats, subset = train, mtry = 6, importance = TRUE)
+bag_random_yhat <- predict(bag_random_6, newdata = test)
+mean((bag_random_yhat - test$Sales)^2)
+```
+
+*Part E Answers:*
+
+With four variables considered at each split I obtained a test mse of 2.963, with 6 variables the test mse was 2.9723, and using the normal bagging approach I obtained a test MSE of 2.942. 
+
+The test MSE using random forests is slightly higher than the bagged approach. This could occur because their isn't a significant correlation between the variables in the data set, resulting in slightly higher variance in the random forest method. 
+
+
+
+
